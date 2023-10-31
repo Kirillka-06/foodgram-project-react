@@ -1,0 +1,8 @@
+static_backend
+venv
+.git
+db.sqlite3
+.idea
+.vscode
+.env
+static_backend
