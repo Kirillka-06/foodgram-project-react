@@ -1,9 +1,8 @@
-from djoser.serializers import (UserSerializer,
-                                UserCreateSerializer,
+from djoser.serializers import (UserCreateSerializer, UserSerializer,
                                 serializers)
 
-from users.models import User, Subscription
 from foods.models import Recipe
+from users.models import Subscription, User
 
 
 class CustomUserSerializer(UserSerializer):

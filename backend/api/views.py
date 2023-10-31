@@ -1,33 +1,20 @@
-from rest_framework.response import Response
-from rest_framework import (viewsets,
-                            permissions,
-                            status,
-                            filters,
-                            pagination,
-                            views,
-                            generics)
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import (filters, generics, pagination, permissions, status,
+                            views, viewsets)
+from rest_framework.response import Response
 
-from foods.models import (Tag,
-                          Ingredient,
-                          Recipe,
-                          Favorite,
-                          ShoppingCart,
-                          IngredientForRecipe)
-from foods.serializers import (TagSerializer,
-                               IngredientSerializer,
-                               CreateRecipeSerializer,
-                               RecipeSerializer)
-from users.models import Subscription
-from users.serializers import (SubscriptionSerializer,
-                               ShortRecipeSerializer)
-from api.permissions import IsAuthorOrReadOnly
 from api.filters import RecipeFilterSet
-
+from api.permissions import IsAuthorOrReadOnly
+from foods.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
+                          ShoppingCart, Tag)
+from foods.serializers import (CreateRecipeSerializer, IngredientSerializer,
+                               RecipeSerializer, TagSerializer)
+from users.models import Subscription
+from users.serializers import ShortRecipeSerializer, SubscriptionSerializer
 
 User = get_user_model()
 

@@ -1,15 +1,9 @@
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from django.urls import path, include
-
-from api.views import (TagViewSet,
-                       IngredientViewSet,
-                       RecipeViewSet,
-                       APIFavorite,
-                       APIShoppingCart,
-                       APISubscription,
-                       ListAPISubscription)
-
+from api.views import (APIFavorite, APIShoppingCart, APISubscription,
+                       IngredientViewSet, ListAPISubscription, RecipeViewSet,
+                       TagViewSet)
 
 food = DefaultRouter()
 food.register('tags', TagViewSet)
