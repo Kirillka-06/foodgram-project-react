@@ -1,10 +1,13 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.db import models
 
 
 class User(AbstractUser):
-    email = models.EmailField('Электронная почта', max_length=254)
+    email = models.EmailField(
+        'Электронная почта',
+        max_length=254,
+        unique=True
+    )
     first_name = models.CharField('Имя', max_length=150)
     last_name = models.CharField('Фамилия', max_length=150)
 
@@ -25,23 +28,17 @@ class Subscription(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         constraints = [
             models.UniqueConstraint(
                 fields=['author', 'follower'],
                 name='unique_subscription'
+            ),
+            models.CheckConstraint(
+                check=~models.Q(follower=models.F('author')),
+                name='forbidden_self_subscription'
             )
         ]
-
-    def clean(self):
-        if self.author == self.follower:
-            raise ValidationError(
-                {'author': 'Поле author не может равняться полю follower',
-                 'follower': 'Поле follower не может равняться полю author'}
-            )
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f'A:{self.author} F:{self.follower}'

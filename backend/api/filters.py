@@ -1,11 +1,28 @@
 from django_filters import FilterSet
+from django_filters import rest_framework
 from django_filters.rest_framework import filters
-from foods.models import Recipe, Tag
+from foods.models import Recipe, Tag, Ingredient
+
+
+class IngredientSearchFilter(FilterSet):
+    """
+    FilterSet-класс для фильтрации поиска запросов
+    на ингредиенты по заданным параметрам.
+    """
+
+    name = rest_framework.CharFilter(
+        field_name='name',
+        lookup_expr='istartswith'
+    )
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)
 
 
 class RecipeFilterSet(FilterSet):
     """
-    Filter-класс для фильтрации запросов на рецепты
+    FilterSet-класс для фильтрации запросов на рецепты
     по заданным параметрам.
     """
 
@@ -30,18 +47,15 @@ class RecipeFilterSet(FilterSet):
         )
 
     def get_is_favorited(self, queryset, field_name, value):
-        print(f'fav: {value}')
-        print(queryset)
         if value:
-            return Recipe.objects.filter(
+            return queryset.objects.filter(
                 favorite_recipe__user=self.request.user
             )
         return queryset
 
     def get_is_in_shopping_cart(self, queryset, field_name, value):
-        print(f'shop: {value}')
         if value:
-            return Recipe.objects.filter(
+            return queryset.objects.filter(
                 shoppinglist_recipe__user=self.request.user
             )
         return queryset

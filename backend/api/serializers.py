@@ -1,10 +1,109 @@
+from djoser.serializers import (UserCreateSerializer, UserSerializer,
+                                serializers)
+from users.models import Subscription, User
+
 import base64
 
 from django.core.files.base import ContentFile
 from foods.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
                           ShoppingCart, Tag, TagForRecipe)
 from rest_framework import serializers
-from users.serializers import CustomUserSerializer
+
+
+class CustomUserSerializer(UserSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed'
+        )
+        read_only_fields = ('is_subscribed',)
+
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return Subscription.objects.filter(
+            author=obj.id,
+            follower=user
+        ).exists()
+
+
+class CustomUserCreateSerializer(UserCreateSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'password'
+        )
+
+
+class ShortRecipeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time'
+        )
+        read_only_fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time'
+        )
+
+
+class SubscriptionSerializer(CustomUserSerializer):
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count'
+        )
+        read_only_fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count'
+        )
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        queryset = obj.recipes.all()
+        recipes_limit = request.query_params.get('recipes_limit')
+        if recipes_limit:
+            queryset = queryset[:int(recipes_limit)]
+        return ShortRecipeSerializer(queryset, many=True).data
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.all().count()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -185,6 +284,15 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
 
+    def validate_amount(self, value):
+        if value <= 0:
+            return serializers.ValidationError(
+                'Количество ингредиентов должно быть больше 0')
+        return value
+
+    def validate(self, attrs):
+        return super().validate(attrs)
+
 
 class FavoriteSerializer(serializers.ModelSerializer):
 
@@ -204,3 +312,4 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
             'user',
             'recipe'
         )
+

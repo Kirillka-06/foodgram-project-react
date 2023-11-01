@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.db import models
 
 User = get_user_model()
@@ -26,6 +26,9 @@ class Tag(models.Model):
         unique=True
     )
 
+    class Meta:
+        ordering = ('id',)
+
     def __str__(self) -> str:
         return (f'Tag. id: {self.id} '
                 f'название : {self.name[:20]}')
@@ -34,6 +37,15 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(max_length=200)
     measurement_unit = models.CharField(max_length=200)
+
+    class Meta:
+        ordering = ('id',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_ingredient'
+            )
+        ]
 
     def __str__(self) -> str:
         return (f'Ingredient. id: {self.id} '
@@ -62,7 +74,10 @@ class Recipe(models.Model):
     )
     text = models.TextField()
     cooking_time = models.PositiveIntegerField(
-        validators=[MinValueValidator(1, 'Cooking_time должно быть больше 1')]
+        validators=[
+            MinValueValidator(1, 'Cooking_time должно быть больше 1'),
+            MaxValueValidator(10000, 'Да что вы там такое готовите?')
+        ]
     )
     pub_date = models.DateTimeField(auto_now_add=True)
 
@@ -86,6 +101,7 @@ class TagForRecipe(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'tag'],
@@ -114,6 +130,7 @@ class IngredientForRecipe(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
@@ -139,6 +156,7 @@ class Favorite(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
@@ -164,6 +182,7 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],

@@ -1,8 +1,9 @@
 from django.contrib import admin
 from users.models import Subscription, User
+from django.contrib.auth.admin import UserAdmin
 
 
-class UserAdmin(admin.ModelAdmin):
+class CustomUserAdmin(UserAdmin):
     list_display = (
         'id',
         'username',
@@ -24,5 +25,5 @@ class SubscriptionAdmin(admin.ModelAdmin):
     )
 
 
-admin.site.register(User, UserAdmin)
+admin.site.register(User, CustomUserAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
