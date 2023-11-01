@@ -311,4 +311,3 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
             'user',
             'recipe'
         )
-
