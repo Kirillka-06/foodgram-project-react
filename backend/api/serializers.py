@@ -1,16 +1,16 @@
 import base64
 
 from django.core.files.base import ContentFile
+from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from djoser.serializers import serializers as djoser_serializers
+
 from foods.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
                           ShoppingCart, Tag, TagForRecipe)
-from rest_framework import serializers
 from users.models import Subscription, User
 
 
 class CustomUserSerializer(UserSerializer):
-    is_subscribed = djoser_serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -67,8 +67,8 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(CustomUserSerializer):
-    recipes = djoser_serializers.SerializerMethodField()
-    recipes_count = djoser_serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -221,6 +221,12 @@ class CreateIngredientForRecipeSerializer(serializers.ModelSerializer):
             'amount'
         )
 
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError(
+                'Количество ингредиентов должно быть больше 0')
+        return value
+
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
@@ -255,7 +261,9 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     def create_ingredients(self, ingredients, recipe):
         for element in ingredients:
             id = element['id']
-            ingredient = Ingredient.objects.get(pk=id)
+            ingredient = Ingredient.objects.filter(id=id).first()
+            if not ingredient:
+                raise serializers.ValidationError('Такого ингредиента нет!')
             amount = element['amount']
             IngredientForRecipe.objects.create(
                 ingredient=ingredient, recipe=recipe, amount=amount
@@ -283,14 +291,14 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
 
-    def validate_amount(self, value):
-        if value <= 0:
-            return serializers.ValidationError(
-                'Количество ингредиентов должно быть больше 0')
-        return value
-
-    def validate(self, attrs):
-        return super().validate(attrs)
+    def validate(self, data):
+        ingredients_list = []
+        for ingredient in data['ingredients']:
+            if ingredient['id'] in ingredients_list:
+                raise serializers.ValidationError(
+                    'Нельзя добавить два одинаковых ингредиента в рецепт!')
+            ingredients_list.append(ingredient['id'])
+        return data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):

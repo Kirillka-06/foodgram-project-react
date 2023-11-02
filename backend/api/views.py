@@ -1,19 +1,20 @@
-from api.filters import IngredientSearchFilter, RecipeFilterSet
-from api.pagination import CustomPagination
-from api.permissions import IsAuthorOrReadOnly
-from api.serializers import (CreateRecipeSerializer, IngredientSerializer,
-                             RecipeSerializer, ShortRecipeSerializer,
-                             SubscriptionSerializer, TagSerializer)
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+from rest_framework.generics import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from foods.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
-                          ShoppingCart, Tag)
 from rest_framework import generics, permissions, status, views, viewsets
 from rest_framework.response import Response
+
 from users.models import Subscription
+from foods.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
+                          ShoppingCart, Tag)
+from .filters import IngredientSearchFilter, RecipeFilterSet
+from .pagination import CustomPagination
+from .permissions import IsAuthorOrReadOnly
+from .serializers import (CreateRecipeSerializer, IngredientSerializer,
+                          RecipeSerializer, ShortRecipeSerializer,
+                          SubscriptionSerializer, TagSerializer)
 
 User = get_user_model()
 
@@ -43,7 +44,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientSearchFilter
-    search_fields = ('name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -62,6 +62,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeSerializer
         elif self.action in ('create', 'partial_update'):
             return CreateRecipeSerializer
+
+    def get_serializer_context(self):
+        try:
+            data: dict = self.request.data
+            if not data['tags'] or not data['ingredients']:
+                raise ValueError(
+                    'Теги и ингредиенты нужны обязательно!')
+            return super().get_serializer_context()
+        except KeyError:
+            return super().get_serializer_context()
 
 
 class ListAPISubscription(generics.ListAPIView):

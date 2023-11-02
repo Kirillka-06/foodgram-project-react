@@ -1,5 +1,7 @@
-from django_filters import FilterSet, rest_framework
-from django_filters.rest_framework import filters
+from rest_framework import exceptions
+from django_filters import FilterSet
+from django_filters.rest_framework import filters, CharFilter
+
 from foods.models import Ingredient, Recipe, Tag
 
 
@@ -9,7 +11,7 @@ class IngredientSearchFilter(FilterSet):
     на ингредиенты по заданным параметрам.
     """
 
-    name = rest_framework.CharFilter(
+    name = CharFilter(
         field_name='name',
         lookup_expr='istartswith'
     )
@@ -46,15 +48,19 @@ class RecipeFilterSet(FilterSet):
         )
 
     def get_is_favorited(self, queryset, field_name, value):
+        if self.request.user.is_anonymous:
+            raise exceptions.PermissionDenied()
         if value:
-            return queryset.objects.filter(
+            return queryset.filter(
                 favorite_recipe__user=self.request.user
             )
         return queryset
 
     def get_is_in_shopping_cart(self, queryset, field_name, value):
+        if self.request.user.is_anonymous:
+            raise exceptions.PermissionDenied()
         if value:
-            return queryset.objects.filter(
+            return queryset.filter(
                 shoppinglist_recipe__user=self.request.user
             )
         return queryset
