@@ -86,7 +86,7 @@ class APISubscription(views.APIView):
     POST- и DELETE-запросы.
     """
 
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, id):
         user = self.request.user
@@ -132,7 +132,7 @@ class APIFavorite(views.APIView):
     POST- и DELETE-запросы.
     """
 
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, id):
         user = self.request.user
@@ -174,7 +174,7 @@ class APIShoppingCart(views.APIView):
     GET-, POST- и DELETE-запросы.
     """
 
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
         user = self.request.user
