@@ -1,8 +1,8 @@
 import base64
 
 from django.core.files.base import ContentFile
-from djoser.serializers import (UserCreateSerializer, UserSerializer,
-                                serializers)
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from djoser.serializers import serializers as djoser_serializers
 from foods.models import (Favorite, Ingredient, IngredientForRecipe, Recipe,
                           ShoppingCart, Tag, TagForRecipe)
 from rest_framework import serializers
@@ -10,7 +10,7 @@ from users.models import Subscription, User
 
 
 class CustomUserSerializer(UserSerializer):
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = djoser_serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -67,8 +67,8 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(CustomUserSerializer):
-    recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
+    recipes = djoser_serializers.SerializerMethodField()
+    recipes_count = djoser_serializers.SerializerMethodField()
 
     class Meta:
         model = User
