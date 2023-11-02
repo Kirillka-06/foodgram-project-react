@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# static and media files
+# Static and media files
 media/
 static/
 
