@@ -1,4 +1,3 @@
-from rest_framework import exceptions
 from django_filters import FilterSet
 from django_filters.rest_framework import filters, CharFilter
 
