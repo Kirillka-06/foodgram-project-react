@@ -301,7 +301,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 if ingredient.get('id') in ingredients_list:
                     raise serializers.ValidationError(
                         'Нельзя добавить два одинаковых ингредиента в рецепт!')
-                ingredients_list.append(ingredient['id'])
+                ingredients_list.append(ingredient.get('id'))
             return data
         except KeyError:
             return data
