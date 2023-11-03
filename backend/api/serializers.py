@@ -292,13 +292,19 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
     def validate(self, data):
-        ingredients_list = []
-        for ingredient in data['ingredients']:
-            if ingredient['id'] in ingredients_list:
+        try:
+            if not data['tags'] or not data['ingredients']:
                 raise serializers.ValidationError(
-                    'Нельзя добавить два одинаковых ингредиента в рецепт!')
-            ingredients_list.append(ingredient['id'])
-        return data
+                    'Теги и ингредиенты нужны обязательно!')
+            ingredients_list = []
+            for ingredient in data.get('ingredients'):
+                if ingredient.get('id') in ingredients_list:
+                    raise serializers.ValidationError(
+                        'Нельзя добавить два одинаковых ингредиента в рецепт!')
+                ingredients_list.append(ingredient['id'])
+            return data
+        except KeyError:
+            return data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):

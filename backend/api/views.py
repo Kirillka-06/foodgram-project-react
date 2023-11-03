@@ -63,16 +63,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         elif self.action in ('create', 'partial_update'):
             return CreateRecipeSerializer
 
-    def get_serializer_context(self):
-        try:
-            data: dict = self.request.data
-            if not data['tags'] or not data['ingredients']:
-                raise ValueError(
-                    'Теги и ингредиенты нужны обязательно!')
-            return super().get_serializer_context()
-        except KeyError:
-            return super().get_serializer_context()
-
 
 class ListAPISubscription(generics.ListAPIView):
     """
