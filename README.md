@@ -88,6 +88,10 @@ https://foodgram-project.hopto.org/
 - username: kirill
 - password: kirkir2006
 
+Еще user
+- email: danchik@yandex.ru
+- password: dandan2000
+
 
 # Информация об авторе
 - Кирилл Кирюшин
