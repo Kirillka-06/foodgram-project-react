@@ -184,12 +184,27 @@ class APIShoppingCart(views.APIView):
             'ingredient__name',
             'ingredient__measurement_unit'
         ).annotate(sum=Sum('amount'))
-        shopping_cart = ''
+
+        unique_ingredients = {}
         for ingredient in ingredients:
+            if (ingredient['ingredient__name'] not in unique_ingredients.keys()
+                or ingredient.get('ingredient__measurement_unit')
+                    != unique_ingredients.get(
+                        ingredient['ingredient__name'])[1]):
+                unique_ingredients[ingredient['ingredient__name']] = [
+                    ingredient['sum'],
+                    ingredient['ingredient__measurement_unit']
+                ]
+            else:
+                unique_ingredients[ingredient['ingredient__name']][0] \
+                    += ingredient['sum']
+
+        shopping_cart = ''
+        for ingredient_name, ingredient_values in unique_ingredients.items():
             shopping_cart += (
-                f'{ingredient["ingredient__name"]} - '
-                f'{ingredient["sum"]} '
-                f'{ingredient["ingredient__measurement_unit"]}\n'
+                f'{ingredient_name} - '
+                f'{ingredient_values[0]} '
+                f'{ingredient_values[1]}\n'
             )
         return HttpResponse(shopping_cart, content_type='text/plain')
 
